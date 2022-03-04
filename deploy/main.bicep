@@ -77,7 +77,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: '${serviceBus.name}.servicebus.windows.net'
         }
         {
-          name: 'CosmosDbConnection_endpoint'
+          name: 'CosmosDbConnection_accountEndpoint'
           value: '${cosmosDb.properties.documentEndpoint}'
         }
       ]
