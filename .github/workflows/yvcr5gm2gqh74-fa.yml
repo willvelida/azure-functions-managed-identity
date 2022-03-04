@@ -8,7 +8,7 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: OrderGenerator/publish
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: OrderGenerator
+  WORKING_DIRECTORY: "src/OrderGenerator"
 jobs:
   build-and-deploy:
     runs-on: windows-latest
