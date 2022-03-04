@@ -24,6 +24,8 @@ param location string = resourceGroup().location
 
 var appServicePlanSku = 'Y1'
 var queueName = 'orders'
+var databaseName = 'OrdersDB'
+var collectionName = 'orders'
 var serviceBusDataReceiverRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0')
 var serviceBusDataSenderRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')
 var cosmosDbDataContributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','b24988ac-6180-42a0-ab88-20f7382dd24c')
@@ -148,6 +150,30 @@ resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2021-10-15' = {
   }
   identity: {
     type: 'SystemAssigned'
+  }
+
+  resource database 'sqlDatabases' = {
+    name: databaseName
+    properties: {
+      resource: {
+        id: databaseName
+      }
+    }
+
+    resource sqlContainer 'containers' = {
+      name: collectionName
+      properties: {
+        resource: {
+          id: collectionName
+          partitionKey: {
+            paths: [
+              '/id'
+            ]
+            kind: 'Hash'
+          }
+        }
+      }
+    }
   }
 }
 
