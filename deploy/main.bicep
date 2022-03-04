@@ -16,6 +16,9 @@ param functionAppName string = toLower('${applicationName}-fa')
 @description('Name of the Storage Account that this Function App will be associated with.')
 param storageAccountName string = toLower('${applicationName}sa')
 
+@description('Name of the Cosmos DB Account')
+param cosmosDbAccountName string = toLower('${applicationName}db')
+
 @description('The location to deploy our resources to. Set to the location of the resource group.')
 param location string = resourceGroup().location
 
@@ -23,6 +26,7 @@ var appServicePlanSku = 'Y1'
 var queueName = 'orders'
 var serviceBusDataReceiverRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0')
 var serviceBusDataSenderRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')
+var cosmosDbDataContributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions','b24988ac-6180-42a0-ab88-20f7382dd24c')
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: appServicePlanName
@@ -114,6 +118,41 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2021-06-01-preview' = {
 
   resource queue 'queues' = {
     name: queueName
+  }
+}
+
+resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2021-10-15' = {
+  name: cosmosDbAccountName
+  location: location
+  properties: {
+    databaseAccountOfferType: 'Standard'
+    locations: [
+      {
+        failoverPriority: 0
+        isZoneRedundant: false
+        locationName: location
+      }
+    ]
+    capabilities: [
+      {
+        name: 'EnableServerless'
+      }
+    ]
+    consistencyPolicy: {
+      defaultConsistencyLevel: 'Session'
+    }
+  }
+  identity: {
+    type: 'SystemAssigned'
+  }
+}
+
+resource cosmosDbContributorRole 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
+  name: guid(cosmosDb.id, functionApp.id, cosmosDbDataContributorRole)
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: cosmosDbDataContributorRole
+    principalType: 'ServicePrincipal'
   }
 }
 
