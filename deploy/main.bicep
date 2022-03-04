@@ -76,6 +76,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'ServiceBusConnection_fullyQualifiedNamespace'
           value: '${serviceBus.name}.servicebus.windows.net'
         }
+        {
+          name: 'CosmosDbConnection_endpoint'
+          value: '${cosmosDb.properties.documentEndpoint}'
+        }
       ]
     }
   }
